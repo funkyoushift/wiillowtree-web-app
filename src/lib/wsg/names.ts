@@ -1,9 +1,12 @@
 import echoNames from "@/data/echo-names.json";
 import locationNames from "@/data/location-names.json";
-import partNames from "@/data/part-names.json";
+import partNamesA from "@/data/part-names.json";
+import partNamesB from "@/data/part-names-b.json";
 import questNames from "@/data/quest-names.json";
 import skillNames from "@/data/skill-names.json";
 import type { GearItem } from "./types";
+
+const partNames = { ...partNamesA, ...partNamesB };
 
 const PARTS = partNames as Record<string, string>;
 const SKILLS = skillNames as Record<string, { name: string; description: string }>;
