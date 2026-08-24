@@ -1,2 +1,17 @@
 WillowTree Web is a TypeScript port of WillowTree# (GPL-3.0).
 See LICENSE.
+
+WillowTree# was created by XanderChaos.
+WSG format research by matt911, Turk645, and XanderChaos.
+X360 class by DJ Shepherd.
+Major revisions by JackSchitt, matt911, da_fileserver, CK Y, mphjens,
+and GOTY Enhanced work in WillowTreeBLDEnhanced by Nicolas Constanty.
+
+STFS/CON open and save in this port follows the WillowTree# / X360 approach
+(GPL-3.0, plus the additional terms in X360.COPYING.TXT from the original
+project). Console private keys are not used. Some Xbox 360 consoles still
+need a tool such as Horizon or Modio to rehash/resign a package, as with
+the desktop editor.
+
+https://sourceforge.net/projects/willowtree/
+https://github.com/Nicolas-Constanty/WillowTreeBLDEnhanced

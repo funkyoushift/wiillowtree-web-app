@@ -50,6 +50,14 @@ export function detectPlatform(bytes: Uint8Array): WillowSaveGame["platform"] | 
   return "unknown";
 }
 
+export function convertPlatform(save: WillowSaveGame, platform: WillowSaveGame["platform"]): WillowSaveGame {
+  const next = cloneSave(save);
+  next.platform = platform;
+  next.endian = platform === "PC" ? "le" : "be";
+  if (platform !== "Xbox360") next.xboxPackage = null;
+  return next;
+}
+
 function readSkills(reader: BinaryReader): Skill[] {
   const count = reader.readI32();
   const skills: Skill[] = [];
@@ -186,6 +194,16 @@ function readEchoes(reader: BinaryReader): EchoTable[] {
   return lists;
 }
 
+function packedSerialPieces(part: string): string[] {
+  const tokens = part.split(".");
+  if (tokens.length <= 3) {
+    const pieces = tokens.slice();
+    while (pieces.length < 3) pieces.push("");
+    return pieces;
+  }
+  return [tokens[0], tokens[1], tokens[2], tokens.slice(3).join(".")];
+}
+
 function readBankPart(reader: BinaryReader, index: number, entry: BankEntry): string {
   const mask = reader.readU8();
   if (mask === 0) {
@@ -226,6 +244,7 @@ function readBankPart(reader: BinaryReader, index: number, entry: BankEntry): st
   for (let i = 0; i < componentCount; i++) {
     pieces.push(reader.readString());
   }
+  while (pieces.length > 0 && pieces[pieces.length - 1] === "") pieces.pop();
   if (index === 2) {
     const packed = reader.readI32() >>> 0;
     entry.quality = packed % 65536;
@@ -288,12 +307,12 @@ function tryReadBankEntries(reader: BinaryReader, enhanced: boolean): BankEntry[
 }
 
 function writeBankPart(writer: BinaryWriter, part: string, index: number, entry: BankEntry): void {
-  if (part === "None") {
+  if (part === "None" || !part) {
     writer.writeBytes(new Uint8Array(25));
     return;
   }
+  const pieces = packedSerialPieces(part);
   writer.writeU8(32);
-  const pieces = part.split(".");
   writer.writeBytes(new Uint8Array((6 - pieces.length) * 4));
   for (const piece of pieces) writer.writeString(piece);
   if (index === 2) {
@@ -368,13 +387,21 @@ function splitInventory(save: WillowSaveGame): {
   return { items1, items2, weapons1, weapons2 };
 }
 
-export function parseSave(bytes: Uint8Array, sourceName = "Save0001.sav"): WillowSaveGame {
-  const platform = detectPlatform(bytes);
-  if (platform === "unknown") {
+export function parseSave(
+  bytes: Uint8Array,
+  sourceName = "Save0001.sav",
+  options?: { platform?: WillowSaveGame["platform"]; ignoreTrailing?: boolean },
+): WillowSaveGame {
+  const detected = detectPlatform(bytes);
+  if (detected === "unknown" && !options?.platform) {
     throw new SaveFormatError(
       "This is not a Borderlands 1 WSG save. PC files start with WSG and live in Documents\\my games\\borderlands\\savedata.",
     );
   }
+  if (detected === "unknown") {
+    throw new SaveFormatError("Xbox package did not contain a WSG save payload.");
+  }
+  const platform = options?.platform ?? detected;
 
   const endian: ByteOrder = platform === "PC" ? "le" : "be";
   const reader = new BinaryReader(bytes, endian);
@@ -483,7 +510,14 @@ export function parseSave(bytes: Uint8Array, sourceName = "Save0001.sav"): Willo
     dlcReader.offset = sectionStart + sectionLength;
   }
 
-  const unknown3 = enhanced && !reader.eof ? reader.readBytes(reader.remaining) : enhanced ? new Uint8Array() : null;
+  const unknown3 =
+    options?.ignoreTrailing || reader.eof
+      ? enhanced
+        ? new Uint8Array()
+        : null
+      : enhanced
+        ? reader.readBytes(reader.remaining)
+        : null;
 
   return {
     platform,
@@ -531,6 +565,8 @@ export function parseSave(bytes: Uint8Array, sourceName = "Save0001.sav"): Willo
     dlc,
     unknown3,
     sourceName,
+    parsedLength: reader.offset,
+    xboxPackage: null,
   };
 }
 

@@ -1,5 +1,5 @@
 import { CLASSES } from "./game-data";
-import type { GearItem, WillowSaveGame } from "./types";
+import type { BankEntry, GearItem, WillowSaveGame } from "./types";
 
 function item(overrides: Partial<GearItem> = {}): GearItem {
   return {
@@ -56,7 +56,7 @@ function weapon(overrides: Partial<GearItem> = {}): GearItem {
 
 export function createDemoSave(options?: {
   enhanced?: boolean;
-  platform?: "PC" | "PS3";
+  platform?: "PC" | "PS3" | "Xbox360";
 }): WillowSaveGame {
   const enhanced = options?.enhanced ?? true;
   const platform = options?.platform ?? "PC";
@@ -155,7 +155,12 @@ export function createDemoSave(options?: {
       hasBackpack: true,
       unknown1: 1,
       bankSize: 42,
-      bank: [],
+      bank: [
+        {
+          ...weapon({ equippedSlot: 0, quality: 4, quantity: 12 }),
+          typeId: 1,
+        } satisfies BankEntry,
+      ],
       bankRaw: null,
       bankDirty: true,
       unknown2: 1,
@@ -168,5 +173,15 @@ export function createDemoSave(options?: {
     },
     unknown3: enhanced ? new Uint8Array(16) : null,
     sourceName: "Save0001.sav",
+    parsedLength: 0,
+    xboxPackage: null,
   };
+}
+
+export function emptyWeapon(): GearItem {
+  return weapon({ equippedSlot: 0, parts: weapon().parts.slice() });
+}
+
+export function emptyItem(): GearItem {
+  return item({ equippedSlot: 0, parts: item().parts.slice() });
 }

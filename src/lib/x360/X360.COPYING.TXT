@@ -1,0 +1,10 @@
+The modified X360 library used by WillowTree# is licensed under the GNU
+General Public License version 3, with additional terms from the original
+X360.COPYING.TXT (DJ Shepherd / WillowTree#).
+
+This browser port implements a subset of STFS CON open/embed sufficient to
+extract and replace the inner WSG. It does not include Xbox 360 private
+keys or console signing material.
+
+See NOTICE and LICENSE in this repository, and the upstream project at
+http://willowtree.sourceforge.net

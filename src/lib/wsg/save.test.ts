@@ -52,6 +52,8 @@ describe("save round trip", () => {
     expect(parsed.weapons[1].quality).toBe(8);
     expect(parsed.dlc.hasBank).toBe(true);
     expect(parsed.dlc.bankSize).toBe(42);
+    expect(parsed.dlc.bank).toHaveLength(1);
+    expect(parsed.dlc.bank[0].kind).toBe("weapon");
     expect(parsed.unknown2?.length).toBe(85);
   });
 

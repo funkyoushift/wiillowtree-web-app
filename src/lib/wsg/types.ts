@@ -9,7 +9,14 @@ export const DLC_SECTION = {
   backpack: 0x234ba901,
 } as const;
 
-export type Platform = "PC" | "PS3";
+export type Platform = "PC" | "PS3" | "Xbox360";
+
+export interface XboxPackage {
+  bytes: Uint8Array;
+  innerOffset: number;
+  innerLength: number;
+  magic: string;
+}
 
 export interface Skill {
   name: string;
@@ -144,6 +151,8 @@ export interface WillowSaveGame {
   };
   unknown3: Uint8Array | null;
   sourceName: string;
+  parsedLength: number;
+  xboxPackage: XboxPackage | null;
 }
 
 export function isEnhanced(save: Pick<WillowSaveGame, "revisionNumber">): boolean {
