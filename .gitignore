@@ -1,0 +1,12 @@
+/node_modules
+/.next/
+/out/
+/build
+.DS_Store
+*.pem
+npm-debug.log*
+.next-env.d.ts
+*.tsbuildinfo
+/agent-tools
+AGENTS.md
+CLAUDE.md
